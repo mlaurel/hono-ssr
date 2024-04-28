@@ -1,0 +1,4 @@
+h1 {
+    color: cornflowerblue;
+    font-size: clamp(2rem, 5vw, 3rem);
+}
