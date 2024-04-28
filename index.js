@@ -1,6 +1,28 @@
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/cloudflare-workers'
-import { homeHtml } from './home.js'
+import { home } from './home.js'
+
+import { extract, install } from '@twind/core'
+import presetTailwind from '@twind/preset-tailwind'
+
+install({
+    presets: [
+        presetTailwind(),
+        {
+            theme: {
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                    serif: ['Georgia', 'serif'],
+                }
+            }
+        }
+    ]
+})
+
+async function ssrTwind(body) {
+    const { html, css } = extract((await body).toString())
+    return html.replace('</head>', `<style data-twind>${css}</style></head>`)
+}
 
 const app = new Hono()
 
@@ -24,7 +46,7 @@ app.use('/css/*', async (c, next) => {
 app.get('/*', serveStatic({ root: "./" }))
 
 app.get('/', (c) => {
-    return c.html(homeHtml)
+    return c.html(ssrTwind(home))
 })
 
 export default app
